@@ -1,0 +1,13 @@
+paper/
+.venv/
+__pycache__/
+*.py[cod]
+*.nbc
+*.nbi
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+data/*.RData
+data/*.npz
+results/*/
