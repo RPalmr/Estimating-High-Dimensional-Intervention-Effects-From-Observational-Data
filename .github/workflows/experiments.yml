@@ -1,0 +1,39 @@
+name: Paper experiments
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  experiments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        command:
+          - python -m experiments.run simulation --setting 1a
+          - python -m experiments.run simulation --setting 1b
+          - python -m experiments.run simulation --setting 2
+          - python -m experiments.run density
+          - python -m experiments.run random
+          - python -m experiments.run riboflavin
+    env:
+      MPLBACKEND: Agg
+      MPLCONFIGDIR: /tmp/ida-matplotlib
+      NUMBA_CACHE_DIR: /tmp/ida-numba
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.lock
+      - run: python -m pip install --no-deps -e .
+      - run: python -m experiments.download_data
+        if: contains(matrix.command, 'riboflavin')
+      - run: ${{ matrix.command }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: experiment-${{ strategy.job-index }}
+          path: results/full

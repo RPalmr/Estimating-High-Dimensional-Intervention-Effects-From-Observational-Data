@@ -1,0 +1,28 @@
+name: Validate implementation
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+      MPLCONFIGDIR: /tmp/ida-matplotlib
+      NUMBA_CACHE_DIR: /tmp/ida-numba
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.lock
+      - run: python -m pip install --no-deps -e .
+      - run: ruff check src tests experiments
+      - run: ruff format --check src tests experiments
+      - run: mypy src experiments
+      - run: pytest -q
+      - run: python -m experiments.run random --output results/ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: random-dataset-results
+          path: results/ci

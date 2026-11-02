@@ -10,4 +10,6 @@ __pycache__/
 dist/
 data/*.RData
 data/*.npz
+data/*.csv
+*.bundle
 results/*/
